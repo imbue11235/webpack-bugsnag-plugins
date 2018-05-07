@@ -31,7 +31,7 @@ class BugsnagSourceMapUploaderPlugin {
   cleanupMap(map) {
       fs.unlink(map, error => {
           if (error) {
-              console.log(`${LOG_PREFIX} ` + error)
+              console.warn(`${LOG_PREFIX} ` + error)
               return
           }
           console.log(`${LOG_PREFIX} "${map}" has been deleted`)
