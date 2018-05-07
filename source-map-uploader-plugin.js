@@ -2,6 +2,7 @@
 
 const upload = require('bugsnag-sourcemaps').upload
 const resolve = require('url').resolve
+const fs = require('graceful-fs');
 const parallel = require('run-parallel-limit')
 
 const LOG_PREFIX = `[BugsnagSourceMapUploaderPlugin]`
@@ -63,11 +64,14 @@ class BugsnagSourceMapUploaderPlugin {
       parallel(sourceMaps.map(sm => cb => {
         console.log(`${LOG_PREFIX} uploading sourcemap for "${sm.url}"`)
         upload(this.getUploadOpts(sm), cb).then(options => {
-            console.log(options)
-            console.log("Done")
+            fs.unlink(sm.map, error => {
+                if (error) {
+                    console.log(`${LOG_PREFIX} ` + error)
+                    return
+                }
+                console.log(`${LOG_PREFIX} map has been deleted`)
+            }
         })
-
-        console.log(this.getUploadOpts(sm))
       }), 10, cb)
     })
   }

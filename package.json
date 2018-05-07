@@ -27,6 +27,7 @@
   "dependencies": {
     "bugsnag-build-reporter": "^1.0.0",
     "bugsnag-sourcemaps": "^1.0.3",
+    "graceful-fs": "^4.1.11",
     "run-parallel-limit": "^1.0.3"
   },
   "standard": {
