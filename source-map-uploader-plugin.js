@@ -70,7 +70,7 @@ class BugsnagSourceMapUploaderPlugin {
                     return
                 }
                 console.log(`${LOG_PREFIX} map has been deleted`)
-            }
+            })
         })
       }), 10, cb)
     })
