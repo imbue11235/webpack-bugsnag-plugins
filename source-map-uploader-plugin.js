@@ -18,6 +18,7 @@ class BugsnagSourceMapUploaderPlugin {
     this.appVersion = options.appVersion
     this.overwrite = options.overwrite
     this.endpoint = options.endpoint
+    this.cleanUp = options.cleanUp
     this.validate()
   }
 
@@ -25,6 +26,16 @@ class BugsnagSourceMapUploaderPlugin {
     if (typeof this.apiKey !== 'string' || this.apiKey.length < 1) {
       throw new Error(`${LOG_PREFIX} "apiKey" is required`)
     }
+  }
+
+  cleanupMap(map) {
+      fs.unlink(map, error => {
+          if (error) {
+              console.log(`${LOG_PREFIX} ` + error)
+              return
+          }
+          console.log(`${LOG_PREFIX} "${map}" has been deleted`)
+      })
   }
 
   apply (compiler) {
@@ -63,15 +74,13 @@ class BugsnagSourceMapUploaderPlugin {
       const sourceMaps = stats.chunks.map(chunkToSourceMapDescriptor).filter(Boolean)
       parallel(sourceMaps.map(sm => cb => {
         console.log(`${LOG_PREFIX} uploading sourcemap for "${sm.url}"`)
-        upload(this.getUploadOpts(sm), cb).then(options => {
-            fs.unlink(sm.map, error => {
-                if (error) {
-                    console.log(`${LOG_PREFIX} ` + error)
-                    return
-                }
-                console.log(`${LOG_PREFIX} map has been deleted`)
+        const up = upload(this.getUploadOpts(sm), cb)
+
+        if (this.cleanUp) {
+            up.then(() => {
+                this.cleanupMap(sm.map)
             })
-        })
+        }
       }), 10, cb)
     })
   }
@@ -82,8 +91,7 @@ class BugsnagSourceMapUploaderPlugin {
       appVersion: this.appVersion,
       minifiedUrl: sm.url,
       minifiedFile: sm.source,
-      sourceMap: sm.map,
-      tempDir: sm.map
+      sourceMap: sm.map
     }
     if (this.endpoint) opts.endpoint = this.endpoint
     if (this.overwrite) opts.overwrite = this.overwrite
