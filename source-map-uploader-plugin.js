@@ -75,7 +75,8 @@ class BugsnagSourceMapUploaderPlugin {
       appVersion: this.appVersion,
       minifiedUrl: sm.url,
       minifiedFile: sm.source,
-      sourceMap: sm.map
+      sourceMap: sm.map,
+      tempDir: sm.map
     }
     if (this.endpoint) opts.endpoint = this.endpoint
     if (this.overwrite) opts.overwrite = this.overwrite
